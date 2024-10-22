@@ -6,19 +6,20 @@ class CustomUser(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_announcer = models.BooleanField(default=False)
     is_normal_user = models.BooleanField(default=False)
+    
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='customuser_set',  # Altere para evitar conflito
         blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        verbose_name='groups',
+        help_text='Os grupos aos quais este usuário pertence. Um usuário receberá todas as permissões concedidas a cada um de seus grupos.',
+        verbose_name='grupos',
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
         related_name='customuser_set',  # Altere para evitar conflito
         blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions',
+        help_text='Permissões específicas para este usuário.',
+        verbose_name='permissões de usuário',
     )
 
     def __str__(self):
@@ -42,12 +43,12 @@ class Campaign(models.Model):
 class UserTask(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tasks')
     task_description = models.TextField(null=True, default="Descrição padrão")  # Permite nulos
-    reward = models.DecimalField(max_digits=10, decimal_places=2)  # Mantendo o termo 'reward' para claridade
+    reward = models.DecimalField(max_digits=10, decimal_places=2)  # Mantendo o termo 'reward' para clareza
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Task for {self.user.username}: {self.description}'
+        return f'Task for {self.user.username}: {self.task_description}'
 
 
 # Modelo para pagamentos
