@@ -6,20 +6,19 @@ class CustomUser(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_announcer = models.BooleanField(default=False)
     is_normal_user = models.BooleanField(default=False)
-    
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='customuser_set',  # Altere para evitar conflito
         blank=True,
-        help_text='Os grupos aos quais este usuário pertence. Um usuário receberá todas as permissões concedidas a cada um de seus grupos.',
-        verbose_name='grupos',
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        verbose_name='groups',
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
         related_name='customuser_set',  # Altere para evitar conflito
         blank=True,
-        help_text='Permissões específicas para este usuário.',
-        verbose_name='permissões de usuário',
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
     )
 
     def __str__(self):
@@ -43,7 +42,7 @@ class Campaign(models.Model):
 class UserTask(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tasks')
     task_description = models.TextField(null=True, default="Descrição padrão")  # Permite nulos
-    reward = models.DecimalField(max_digits=10, decimal_places=2)  # Mantendo o termo 'reward' para clareza
+    reward = models.DecimalField(max_digits=10, decimal_places=2)  # Mantendo o termo 'reward' para claridade
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -60,3 +59,34 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'Payment of {self.amount} for {self.user.username}'
+
+
+# Modelo para ofertas PTC
+class PTOffer(models.Model):
+    title = models.CharField(max_length=255)  # Título da oferta
+    description = models.TextField()  # Descrição da oferta
+    reward = models.DecimalField(max_digits=10, decimal_places=2)  # Recompensa da oferta
+    created_at = models.DateTimeField(auto_now_add=True)  # Data de criação
+    updated_at = models.DateTimeField(auto_now=True)  # Data da última atualização
+
+    class Meta:
+        verbose_name = "Oferta PTC"
+        verbose_name_plural = "Ofertas PTC"
+
+    def __str__(self):
+        return self.title
+
+
+# Modelo para registrar a participação do usuário nas ofertas PTC
+class UserPTOffer(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_pt_offers')  # Usuário que participou da oferta
+    pt_offer = models.ForeignKey(PTOffer, on_delete=models.CASCADE, related_name='user_participations')  # Oferta PTC associada
+    participation_date = models.DateTimeField(auto_now_add=True)  # Data de participação
+    completed = models.BooleanField(default=False)  # Indica se a oferta foi completada
+
+    class Meta:
+        verbose_name = "Participação na Oferta PTC"
+        verbose_name_plural = "Participações nas Ofertas PTC"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.pt_offer.title}"
