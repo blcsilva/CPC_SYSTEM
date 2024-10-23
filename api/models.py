@@ -61,14 +61,21 @@ class Payment(models.Model):
         return f'Payment of {self.amount} for {self.user.username}'
 
 
-# Modelo para ofertas PTC
-class PTOffer(models.Model):
-    title = models.CharField(max_length=255)  # Título da oferta
-    description = models.TextField()  # Descrição da oferta
-    reward = models.DecimalField(max_digits=10, decimal_places=2)  # Recompensa da oferta
-    created_at = models.DateTimeField(auto_now_add=True)  # Data de criação
-    updated_at = models.DateTimeField(auto_now=True)  # Data da última atualização
+class OfferCategory(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
+class PTOffer(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    reward = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    category = models.ForeignKey(OfferCategory, on_delete=models.CASCADE, related_name='offers', null=True)
+    
     class Meta:
         verbose_name = "Oferta PTC"
         verbose_name_plural = "Ofertas PTC"
@@ -90,3 +97,13 @@ class UserPTOffer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.pt_offer.title}"
+    
+    
+class Withdrawal(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='withdrawals')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
+    
+    def __str__(self):
+        return f'Withdrawal of {self.amount} for {self.user.username}'

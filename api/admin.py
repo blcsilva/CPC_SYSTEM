@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import CustomUser, Campaign, UserTask, Payment, PTOffer, UserPTOffer
+from .models import CustomUser, Campaign, UserTask, Payment, PTOffer, UserPTOffer, OfferCategory
+
 
 # Registro do modelo CustomUser
 @admin.register(CustomUser)
@@ -42,4 +43,11 @@ class UserPTOfferAdmin(admin.ModelAdmin):
     list_display = ('user', 'pt_offer', 'participation_date', 'completed')
     search_fields = ('user__username',)
     list_filter = ('completed', 'participation_date')
+    
+    
+    
+@admin.register(OfferCategory)
+class OfferCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
 

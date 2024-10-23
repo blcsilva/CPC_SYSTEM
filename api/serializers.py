@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import CustomUser, Campaign, UserTask, Payment, PTOffer, UserPTOffer
+from .models import CustomUser, Campaign, UserTask, Payment, PTOffer, UserPTOffer, OfferCategory, Withdrawal
+
 
 # Serializer para o modelo CustomUser
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -57,17 +58,23 @@ class PaymentSerializer(serializers.ModelSerializer):
         return value
 
 
+class OfferCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferCategory
+        fields = ('id', 'name', 'description')
+
 # Serializer para o modelo PTOffer
 class PTOfferSerializer(serializers.ModelSerializer):
+    category = OfferCategorySerializer(read_only=True)  # Exibir detalhes da categoria
+
     class Meta:
         model = PTOffer
-        fields = ('id', 'title', 'description', 'reward', 'created_at', 'updated_at')
+        fields = ('id', 'title', 'description', 'reward', 'created_at', 'updated_at', 'category')
 
     def validate_reward(self, value):
         if value <= 0:
             raise serializers.ValidationError("A recompensa deve ser um valor positivo.")
         return value
-
 
 # Serializer para registrar a participação do usuário nas ofertas PTC
 class UserPTOfferSerializer(serializers.ModelSerializer):
@@ -77,4 +84,10 @@ class UserPTOfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPTOffer
         fields = ('id', 'user', 'pt_offer', 'participation_date', 'completed')
+
+
+class WithdrawalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Withdrawal
+        fields = '__all__'
 
