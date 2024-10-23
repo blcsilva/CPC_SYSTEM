@@ -47,7 +47,7 @@ class UserTask(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Task for {self.user.username}: {self.description}'
+        return f'Task for {self.user.username}: {self.task_description}'
 
 
 # Modelo para pagamentos
@@ -59,3 +59,51 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'Payment of {self.amount} for {self.user.username}'
+
+
+class OfferCategory(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class PTOffer(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    reward = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    category = models.ForeignKey(OfferCategory, on_delete=models.CASCADE, related_name='offers', null=True)
+    
+    class Meta:
+        verbose_name = "Oferta PTC"
+        verbose_name_plural = "Ofertas PTC"
+
+    def __str__(self):
+        return self.title
+
+
+# Modelo para registrar a participação do usuário nas ofertas PTC
+class UserPTOffer(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_pt_offers')  # Usuário que participou da oferta
+    pt_offer = models.ForeignKey(PTOffer, on_delete=models.CASCADE, related_name='user_participations')  # Oferta PTC associada
+    participation_date = models.DateTimeField(auto_now_add=True)  # Data de participação
+    completed = models.BooleanField(default=False)  # Indica se a oferta foi completada
+
+    class Meta:
+        verbose_name = "Participação na Oferta PTC"
+        verbose_name_plural = "Participações nas Ofertas PTC"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.pt_offer.title}"
+    
+    
+class Withdrawal(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='withdrawals')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
+    
+    def __str__(self):
+        return f'Withdrawal of {self.amount} for {self.user.username}'
