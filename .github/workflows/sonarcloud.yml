@@ -1,0 +1,35 @@
+# Workflow para integração com SonarCloud para análise de código
+# Gera alertas de vulnerabilidades e outros problemas diretamente no GitHub
+
+name: SonarCloud analysis
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  pull-requests: read # permite ao SonarCloud decorar PRs com resultados de análise
+
+jobs:
+  Analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v2.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Referência ao token configurado nos secrets do GitHub
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} # Referência ao project key do SonarCloud
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}       # Referência à chave da organização no SonarCloud
+            -Dsonar.host.url=https://sonarcloud.io
+            # Outros argumentos opcionais podem ser adicionados aqui
+            # -Dsonar.sources=src  # caminho para os arquivos de código fonte, opcional
+            # -Dsonar.tests=tests  # caminho para os arquivos de testes, opcional
